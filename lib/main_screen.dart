@@ -1,8 +1,12 @@
+import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:splitup/app_theme.dart';
 import 'package:splitup/main_controller.dart';
+import 'package:splitup/theme_controller.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -17,54 +21,43 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final themeController = ThemeController.instance;
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(
-          'SplitUp',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22.sp,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        actions: [],
+        title: Text('SplitUp'),
+        actions: [
+          Obx(() {
+            return CupertinoSwitch(
+              inactiveTrackColor: Colors.grey.shade300,
+              value: themeController.isDarkMode,
+              onChanged: (_) => themeController.toggleTheme(),
+            );
+          }),
+        ],
       ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 100.h),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          gradient: theme.extension<BackgroundTheme>()?.backgroundGradient,
         ),
         child: Column(
           children: [
             buildGlassCard(
+              context: context,
               padding: EdgeInsets.symmetric(vertical: 25.h),
               child: Column(
                 children: [
-                  Text(
-                    'Total Per Person',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 15.sp,
-                    ),
-                  ),
+                  Text('Total Per Person', style: theme.textTheme.displaySmall),
                   SizedBox(height: 5.h),
                   Obx(() {
                     return Text(
                       'Rs. ${_mainController.individualBill}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 25.sp,
-                      ),
+                      style: theme.textTheme.displayLarge,
                     );
                   }),
                 ],
@@ -72,6 +65,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
             SizedBox(height: 15.h),
             buildGlassCard(
+              context: context,
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -81,27 +75,9 @@ class _MainScreenState extends State<MainScreen> {
                     controller: _totalBillController,
                     decoration: InputDecoration(
                       prefixText: 'Rs. ',
-                      prefixStyle: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w900,
-                      ),
                       labelText: 'Bill Amount',
-                      labelStyle: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w900,
-                      ),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
                     ),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w900,
-                    ),
+                    style: theme.textTheme.displayMedium,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(
@@ -118,33 +94,22 @@ class _MainScreenState extends State<MainScreen> {
                   SizedBox(height: 25.h),
                   Row(
                     children: [
-                      Text(
-                        'Split',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
+                      Text('Split', style: theme.textTheme.displaySmall),
                       Spacer(),
                       GestureDetector(
-                        child: Icon(Icons.remove, color: Colors.white),
+                        child: Icon(Icons.remove),
                         onTap: () => _mainController.removePerson(),
                       ),
                       SizedBox(width: 5.w),
                       Obx(() {
                         return Text(
                           '${_mainController.totalPersons}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: theme.textTheme.displaySmall,
                         );
                       }),
                       SizedBox(width: 5.w),
                       GestureDetector(
-                        child: Icon(Icons.add, color: Colors.white),
+                        child: Icon(Icons.add),
                         onTap: () => _mainController.addPerson(),
                       ),
                     ],
@@ -152,35 +117,58 @@ class _MainScreenState extends State<MainScreen> {
                   SizedBox(height: 15.h),
                   Row(
                     children: [
-                      Text(
-                        'Tip',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
+                      Text('Tip', style: theme.textTheme.displaySmall),
                       Spacer(),
                       Obx(() {
                         return Text(
                           'Rs. ${_mainController.tip}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: theme.textTheme.displaySmall,
                         );
                       }),
                     ],
                   ),
                   SizedBox(height: 10.h),
                   Obx(() {
-                    return Slider(
-                      value: _mainController.tip,
-                      onChanged: (value) => _mainController.setTip(value),
-                      min: 0,
-                      max: 300,
-                      divisions: 6,
+                    final isDark =
+                        Theme.of(context).brightness == Brightness.dark;
+
+                    return SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 6,
+                        inactiveTrackColor: isDark
+                            ? Colors.white24
+                            : Colors.grey.shade300,
+                        thumbColor: isDark
+                            ? Colors.purpleAccent
+                            : Colors.deepPurpleAccent,
+                        overlayColor: isDark
+                            ? Colors.purpleAccent.withValues(alpha: 0.3)
+                            : Colors.deepPurpleAccent.withValues(alpha: 0.2),
+                        thumbShape: const RoundSliderThumbShape(
+                          enabledThumbRadius: 12,
+                        ),
+                        overlayShape: const RoundSliderOverlayShape(
+                          overlayRadius: 20,
+                        ),
+                        trackShape: const RoundedRectSliderTrackShape(),
+                        valueIndicatorShape:
+                            const PaddleSliderValueIndicatorShape(),
+                        valueIndicatorColor: isDark
+                            ? Colors.black
+                            : Colors.white,
+                        valueIndicatorTextStyle: TextStyle(
+                          color: isDark ? Colors.white : Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      child: Slider(
+                        value: _mainController.tip,
+                        onChanged: (value) => _mainController.setTip(value),
+                        min: 0,
+                        max: 300,
+                        divisions: 6,
+                        label: 'Rs. ${_mainController.tip.round()}',
+                      ),
                     );
                   }),
                 ],
@@ -193,22 +181,54 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-Widget buildGlassCard({required Widget child, required EdgeInsets padding}) {
-  return Container(
-    width: double.infinity,
-    padding: padding,
-    decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(20.r),
-      border: Border.all(color: Colors.white24),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black26,
-          blurRadius: 10.r,
-          offset: Offset(0, 6),
+Widget buildGlassCard({
+  required BuildContext context,
+  required Widget child,
+  EdgeInsets padding = const EdgeInsets.all(16),
+}) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(20.r),
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+      child: Container(
+        width: double.infinity,
+        padding: padding,
+        decoration: BoxDecoration(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.white.withValues(alpha: 0.25),
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.white.withValues(alpha: 0.3),
+            width: isDark ? 1.0 : 1.5,
+          ),
+          boxShadow: isDark
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: const Color(0x33B39DDB),
+                    blurRadius: 28,
+                    offset: const Offset(0, 18),
+                  ),
+                  BoxShadow(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    blurRadius: 10,
+                    offset: const Offset(-6, -6),
+                  ),
+                ],
         ),
-      ],
+        child: child,
+      ),
     ),
-    child: child,
   );
 }

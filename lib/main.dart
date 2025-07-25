@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:splitup/app_theme.dart';
 import 'package:splitup/main_controller.dart';
 import 'package:splitup/main_screen.dart';
+import 'package:splitup/theme_controller.dart';
 
 void main() async {
   await ScreenUtil.ensureScreenSize();
@@ -17,10 +19,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(393, 873),
-      child: GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: MainScreen(),
-      ),
+      builder: (context, child) {
+        return GetBuilder<ThemeController>(
+          init: ThemeController.instance,
+          builder: (controller) {
+            return GetMaterialApp(
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: controller.themeMode,
+              debugShowCheckedModeBanner: false,
+              home: MainScreen(),
+            );
+          },
+        );
+      },
     );
   }
 }
