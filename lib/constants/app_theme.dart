@@ -67,6 +67,10 @@ class AppTheme {
         borderSide: BorderSide(color: grey),
         borderRadius: BorderRadius.circular(10.r),
       ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: black, width: 2),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
     ),
     iconTheme: IconThemeData(color: black),
   );
@@ -115,6 +119,10 @@ class AppTheme {
       ),
       border: OutlineInputBorder(
         borderSide: BorderSide(color: grey),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: white, width: 2),
         borderRadius: BorderRadius.circular(10.r),
       ),
     ),
